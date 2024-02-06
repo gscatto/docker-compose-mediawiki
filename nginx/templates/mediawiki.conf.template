@@ -19,4 +19,9 @@ server {
         location ~ ^/(COPYING|CREDITS)$ {
                  default_type text/plain;
         }
+
+        # Disallow every other entry point
+        location / {
+                 return 404;
+        }
 }
