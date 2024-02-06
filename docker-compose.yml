@@ -3,3 +3,16 @@ services:
     build: nginx
     ports:
       - 80:80
+    volumes:
+      - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
+    environment:
+      - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
+  mediawiki_html:
+    build: mediawiki_html
+    volumes:
+      - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
+    environment:
+      - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
+
+volumes:
+  mediawiki_html:

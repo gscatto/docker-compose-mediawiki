@@ -1,0 +1,13 @@
+server {
+        listen 80;
+        listen [::]:80;
+
+        root /var/www/${MEDIAWIKI_HOST}/html;
+        index index.html;
+
+        server_name ${MEDIAWIKI_HOST} www.${MEDIAWIKI_HOST};
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
