@@ -4,3 +4,4 @@ ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/do
 RUN chmod +x /usr/local/bin/install-php-extensions
 # Install PHP extensions
 RUN install-php-extensions intl
+RUN install-php-extensions apcu
