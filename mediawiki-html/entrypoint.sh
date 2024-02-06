@@ -2,7 +2,7 @@ set -eu
 
 main () {
     make_mediawiki_directory
-    install_mediawiki
+    download_mediawiki
     make_nginx_own_mediawiki
 }
 
@@ -10,7 +10,7 @@ make_mediawiki_directory () {
     mkdir -p /var/www/${MEDIAWIKI_HOST}/html/w
 }
 
-install_mediawiki () {
+download_mediawiki () {
     if ! cat /var/www/${MEDIAWIKI_HOST}/URL | grep -q ${MEDIAWIKI_TARBALL_URL}; then
         rm -rf /var/www/${MEDIAWIKI_HOST}/html/w/*
         wget ${MEDIAWIKI_TARBALL_URL}
