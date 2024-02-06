@@ -14,4 +14,9 @@ server {
                 fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
                 include fastcgi_params;
         }
+
+        # License and credits files
+        location ~ ^/(COPYING|CREDITS)$ {
+                 default_type text/plain;
+        }
 }
