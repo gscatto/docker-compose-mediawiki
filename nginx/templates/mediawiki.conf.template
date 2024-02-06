@@ -7,8 +7,8 @@ server {
 
         server_name ${MEDIAWIKI_HOST} www.${MEDIAWIKI_HOST};
 
-        # pass the PHP scripts to FastCGI server listening on php-fpm:9000
-        location ~ ^/index\.php$ {
+        # Pass the PHP scripts to FastCGI server listening on php-fpm:9000
+        location ~ ^/(index|load|api|thumb|opensearch_desc|rest|img_auth)\.php$ {
                 fastcgi_pass php-fpm:9000;
                 fastcgi_index index.php;
                 fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
