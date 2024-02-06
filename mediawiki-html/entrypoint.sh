@@ -7,7 +7,7 @@ main () {
 }
 
 make_mediawiki_directory () {
-    mkdir -p /var/www/${MEDIAWIKI_HOST}/html/w
+    mkdir -p /mediawiki
 }
 
 mediawiki_is_present () {
@@ -18,19 +18,19 @@ mediawiki_is_present () {
 }
 
 mediawiki_is_not_present () {
-    ! cat /var/www/${MEDIAWIKI_HOST}/URL | grep -q ${MEDIAWIKI_TARBALL_URL}
+    ! cat /mediawiki/MEDIAWIKI_TARBALL_URL | grep -q ${MEDIAWIKI_TARBALL_URL}
 }
 
 download_mediawiki () {
-    rm -rf /var/www/${MEDIAWIKI_HOST}/html/w/*
+    rm -rf /mediawiki/*
     wget ${MEDIAWIKI_TARBALL_URL}
     tar -xvf mediawiki-*.tar.gz
-    mv mediawiki-*/* /var/www/${MEDIAWIKI_HOST}/html/w
+    mv mediawiki-*/* /mediawiki
     rm -r mediawiki-*
 }
 
 remember_mediawiki_is_present () {
-    echo ${MEDIAWIKI_TARBALL_URL} > /var/www/${MEDIAWIKI_HOST}/URL
+    echo ${MEDIAWIKI_TARBALL_URL} > /mediawiki/MEDIAWIKI_TARBALL_URL
 }
 
 make_nginx_own_mediawiki () {
@@ -44,7 +44,7 @@ make_nginx_own_mediawiki () {
     # uid=101(nginx) gid=101(nginx) groups=101(nginx)
     #
     # Source: https://hub.docker.com/_/nginx
-    chown -R 101:101 /var/www/${MEDIAWIKI_HOST}/html/w
+    chown -R 101:101 /mediawiki
 }
 
 main
