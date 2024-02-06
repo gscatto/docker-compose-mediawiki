@@ -15,6 +15,13 @@ server {
                 include fastcgi_params;
         }
 
+        # MediaWiki assets (usually images)
+        location ~ ^/resources/(assets|lib|src) {
+                 try_files $uri =404;
+                 add_header Cache-Control "public";
+                 expires 7d;
+        }
+
         # License and credits files
         location ~ ^/(COPYING|CREDITS)$ {
                  default_type text/plain;
