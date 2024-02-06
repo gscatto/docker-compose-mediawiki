@@ -14,7 +14,7 @@ services:
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
   php-fpm:
-    image: php:8.3.1-fpm-bookworm
+    build: php-fpm
     volumes:
       - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
 
