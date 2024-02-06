@@ -32,6 +32,13 @@ server {
                  expires 7d;
         }
 
+        # Assets, scripts and styles from skins and extensions
+        location ~ ^/w/(skins|extensions)/.+\.(css|js|gif|jpg|jpeg|png|svg|wasm|ttf|woff|woff2)$ {
+                 try_files $uri =404;
+                 add_header Cache-Control "public";
+                 expires 7d;
+        }
+
         # License and credits files
         location ~ ^/w/(COPYING|CREDITS)$ {
                  default_type text/plain;
