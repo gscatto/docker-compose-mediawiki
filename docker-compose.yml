@@ -4,19 +4,19 @@ services:
     ports:
       - 80:80
     volumes:
-      - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
+      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
-  mediawiki_html:
-    build: mediawiki_html
+  mediawiki-html:
+    build: mediawiki-html
     volumes:
-      - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
+      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
   php-fpm:
     build: php-fpm
     volumes:
-      - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
+      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
   mariadb:
     build: mariadb
     environment:
@@ -26,4 +26,4 @@ services:
 
 volumes:
   mariadb:
-  mediawiki_html:
+  mediawiki-html:
