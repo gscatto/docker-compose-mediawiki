@@ -3,7 +3,7 @@ server {
         listen [::]:80;
 
         root /var/www/${MEDIAWIKI_HOST}/html;
-        index index.php;
+        index /w/index.php;
 
         server_name ${MEDIAWIKI_HOST} www.${MEDIAWIKI_HOST};
 
