@@ -15,6 +15,16 @@ server {
                 include fastcgi_params;
         }
 
+        # Images
+        location /images {
+                 # Separate location for images/ so .php execution won't apply
+        }
+
+        location /images/deleted {
+                 # Deny access to deleted images folder
+                 deny all;
+        }
+
         # MediaWiki assets (usually images)
         location ~ ^/resources/(assets|lib|src) {
                  try_files $uri =404;
