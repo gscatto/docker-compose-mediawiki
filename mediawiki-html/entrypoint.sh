@@ -1,3 +1,5 @@
+set -eu
+
 main () {
     make_mediawiki_directory
     install_mediawiki
