@@ -2,6 +2,7 @@ set -eu
 
 main () {
     mediawiki_is_present
+    mediawiki_is_installed
     make_nginx_own_mediawiki
 }
 
@@ -19,13 +20,30 @@ mediawiki_is_not_present () {
 download_mediawiki () {
     rm -rf /mediawiki/*
     wget ${MEDIAWIKI_TARBALL_URL}
-    tar -xvf mediawiki-*.tar.gz
-    mv mediawiki-*/* /mediawiki
-    rm -r mediawiki-*
+    tar -xf mediawiki-*.tar.gz
+    cp -r mediawiki-*/* /mediawiki
+    rm -rf mediawiki-*
 }
 
 remember_mediawiki_is_present () {
     echo ${MEDIAWIKI_TARBALL_URL} > /mediawiki/MEDIAWIKI_TARBALL_URL
+}
+
+mediawiki_is_installed () {
+    if mediawiki_is_not_installed; then
+        install_mediawiki
+    fi
+}
+
+mediawiki_is_not_installed () {
+    ! [ -f /mediawiki/LocalSettings.php ]
+}
+
+install_mediawiki () {
+    (
+        cd /mediawiki;
+        php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
+    )
 }
 
 make_nginx_own_mediawiki () {

@@ -22,8 +22,19 @@ services:
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
       - MEDIAWIKI_TARBALL_URL=${MEDIAWIKI_TARBALL_URL}
+      - MEDIAWIKI_ADMIN_PASS=${MEDIAWIKI_ADMIN_PASS}
+      - MEDIAWIKI_DB_USER=${MEDIAWIKI_DB_USER}
+      - MEDIAWIKI_DB_PASS=${MEDIAWIKI_DB_PASS}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MEDIAWIKI_SCRIPT_PATH=${MEDIAWIKI_SCRIPT_PATH}
+      - MEDIAWIKI_WIKI_NAME=${MEDIAWIKI_WIKI_NAME}
+      - MEDIAWIKI_ADMIN_USER=${MEDIAWIKI_ADMIN_USER}
+    depends_on:
+      mariadb:
+        condition: service_healthy
   php-fpm:
     build: php-fpm
+    image: 283124aa-c663-4ec0-900d-82cab0ab7c29
     volumes:
       - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html/w
       - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/w/extensions/private
@@ -44,6 +55,13 @@ services:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     volumes:
       - mariadb:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      start_period: 1m
+      start_interval: 5s
+      interval: 1m
+      timeout: 5s
+      retries: 3
 
 volumes:
   mariadb:
