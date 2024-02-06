@@ -9,7 +9,10 @@ make_mediawiki_directory () {
 }
 
 install_mediawiki () {
-    echo '<html><body><h1>Hello, world!</h1></body></html>' > /var/www/${MEDIAWIKI_HOST}/html/index.html
+    wget https://releases.wikimedia.org/mediawiki/1.39/mediawiki-1.39.6.tar.gz
+    tar -xvf mediawiki-*.tar.gz
+    mv mediawiki-*/* /var/www/${MEDIAWIKI_HOST}/html
+    rm -r mediawiki-*
 }
 
 make_nginx_own_mediawiki () {

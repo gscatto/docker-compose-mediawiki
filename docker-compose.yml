@@ -13,6 +13,10 @@ services:
       - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
+  php-fpm:
+    image: php:8.3.1-fpm-bookworm
+    volumes:
+      - mediawiki_html:/var/www/${MEDIAWIKI_HOST}/html
 
 volumes:
   mediawiki_html:
