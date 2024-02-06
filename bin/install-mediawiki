@@ -13,19 +13,19 @@ main () {
 }
 
 mediawiki_is_not_installed () {
-    ! docker compose exec php-fpm [ -f /var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php ]
+    ! docker compose exec php-fpm [ -f /var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php ]
 }
 
 install_mediawiki () {
-    docker compose exec -w /var/www/${MEDIAWIKI_HOST}/html php-fpm php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
+    docker compose exec -w /var/www/${MEDIAWIKI_HOST}/html/w php-fpm php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
 }
 
 local_settings_contain_public_and_private_parameters () {
-    docker compose exec php-fpm grep -q ^\$wgSitename /var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php
+    docker compose exec php-fpm grep -q ^\$wgSitename /var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php
 }
 
 download_local_settings () {
-    docker compose cp php-fpm:/var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php $TMP/local_settings
+    docker compose cp php-fpm:/var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php $TMP/local_settings
 }
 
 generate_public_local_settings () {
@@ -43,7 +43,7 @@ EOF
 }
 
 overwrite_local_settings () {
-    docker compose cp $TMP/private_local_settings php-fpm:/var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php
+    docker compose cp $TMP/private_local_settings php-fpm:/var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php
 }
 
 TMP=$(mktemp -d)

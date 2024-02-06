@@ -4,8 +4,8 @@ services:
     ports:
       - 80:80
     volumes:
-      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
-      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/extensions/private
+      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html/w
+      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/w/extensions/private
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
     depends_on:
@@ -18,15 +18,15 @@ services:
   mediawiki-html:
     build: mediawiki-html
     volumes:
-      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
+      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html/w
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
       - MEDIAWIKI_TARBALL_URL=${MEDIAWIKI_TARBALL_URL}
   php-fpm:
     build: php-fpm
     volumes:
-      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
-      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/extensions/private
+      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html/w
+      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/w/extensions/private
     # User and group id
     #
     # Since 1.17.0, both alpine- and debian-based images variants use
