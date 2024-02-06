@@ -1,13 +1,8 @@
 set -eu
 
 main () {
-    make_mediawiki_directory
     mediawiki_is_present
     make_nginx_own_mediawiki
-}
-
-make_mediawiki_directory () {
-    mkdir -p /mediawiki
 }
 
 mediawiki_is_present () {
