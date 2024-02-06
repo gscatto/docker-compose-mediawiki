@@ -15,6 +15,13 @@ services:
         condition: service_started
       php-fpm:
         condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      start_period: 1m
+      start_interval: 5s
+      interval: 1m
+      timeout: 5s
+      retries: 3
   mediawiki-html:
     build: mediawiki-html
     volumes:
