@@ -20,6 +20,7 @@ services:
       - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
+      - MEDIAWIKI_TARBALL_URL=${MEDIAWIKI_TARBALL_URL}
   php-fpm:
     build: php-fpm
     volumes:

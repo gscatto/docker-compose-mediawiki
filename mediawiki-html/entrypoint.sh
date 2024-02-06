@@ -11,13 +11,13 @@ make_mediawiki_directory () {
 }
 
 install_mediawiki () {
-    if ! cat /var/www/${MEDIAWIKI_HOST}/URL | grep -q https://releases.wikimedia.org/mediawiki/1.39/mediawiki-1.39.6.tar.gz; then
-        rm -r /var/www/${MEDIAWIKI_HOST}/html
-        wget https://releases.wikimedia.org/mediawiki/1.39/mediawiki-1.39.6.tar.gz
+    if ! cat /var/www/${MEDIAWIKI_HOST}/URL | grep -q ${MEDIAWIKI_TARBALL_URL}; then
+        rm -rf /var/www/${MEDIAWIKI_HOST}/html/*
+        wget ${MEDIAWIKI_TARBALL_URL}
         tar -xvf mediawiki-*.tar.gz
         mv mediawiki-*/* /var/www/${MEDIAWIKI_HOST}/html
         rm -r mediawiki-*
-        echo https://releases.wikimedia.org/mediawiki/1.39/mediawiki-1.39.6.tar.gz > /var/www/${MEDIAWIKI_HOST}/URL
+        echo ${MEDIAWIKI_TARBALL_URL} > /var/www/${MEDIAWIKI_HOST}/URL
     fi
 }
 
