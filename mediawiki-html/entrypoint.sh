@@ -2,7 +2,7 @@ set -eu
 
 main () {
     make_mediawiki_directory
-    download_mediawiki
+    mediawiki_is_present
     make_nginx_own_mediawiki
 }
 
@@ -10,15 +10,27 @@ make_mediawiki_directory () {
     mkdir -p /var/www/${MEDIAWIKI_HOST}/html/w
 }
 
-download_mediawiki () {
-    if ! cat /var/www/${MEDIAWIKI_HOST}/URL | grep -q ${MEDIAWIKI_TARBALL_URL}; then
-        rm -rf /var/www/${MEDIAWIKI_HOST}/html/w/*
-        wget ${MEDIAWIKI_TARBALL_URL}
-        tar -xvf mediawiki-*.tar.gz
-        mv mediawiki-*/* /var/www/${MEDIAWIKI_HOST}/html/w
-        rm -r mediawiki-*
-        echo ${MEDIAWIKI_TARBALL_URL} > /var/www/${MEDIAWIKI_HOST}/URL
+mediawiki_is_present () {
+    if mediawiki_is_not_present; then
+        download_mediawiki
+        remember_mediawiki_is_present
     fi
+}
+
+mediawiki_is_not_present () {
+    ! cat /var/www/${MEDIAWIKI_HOST}/URL | grep -q ${MEDIAWIKI_TARBALL_URL}
+}
+
+download_mediawiki () {
+    rm -rf /var/www/${MEDIAWIKI_HOST}/html/w/*
+    wget ${MEDIAWIKI_TARBALL_URL}
+    tar -xvf mediawiki-*.tar.gz
+    mv mediawiki-*/* /var/www/${MEDIAWIKI_HOST}/html/w
+    rm -r mediawiki-*
+}
+
+remember_mediawiki_is_present () {
+    echo ${MEDIAWIKI_TARBALL_URL} > /var/www/${MEDIAWIKI_HOST}/URL
 }
 
 make_nginx_own_mediawiki () {
