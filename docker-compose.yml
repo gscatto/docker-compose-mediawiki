@@ -7,6 +7,13 @@ services:
       - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
+    depends_on:
+      mediawiki-html:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_started
+      php-fpm:
+        condition: service_started
   mediawiki-html:
     build: mediawiki-html
     volumes:
