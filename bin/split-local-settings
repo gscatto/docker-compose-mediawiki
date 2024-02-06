@@ -1,23 +1,12 @@
 #!/usr/bin/env -S sh -eu
 
 main () {
-    if mediawiki_is_not_installed; then
-        install_mediawiki
-    fi
     if local_settings_contain_public_and_private_parameters; then
         download_local_settings
         generate_public_local_settings
         generate_private_local_settings
         overwrite_local_settings
     fi
-}
-
-mediawiki_is_not_installed () {
-    ! docker compose exec php-fpm [ -f /var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php ]
-}
-
-install_mediawiki () {
-    docker compose exec -w /var/www/${MEDIAWIKI_HOST}/html/w php-fpm php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
 }
 
 local_settings_contain_public_and_private_parameters () {
