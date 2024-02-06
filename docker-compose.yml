@@ -5,6 +5,7 @@ services:
       - 80:80
     volumes:
       - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
+      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/extensions/private
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
     depends_on:
@@ -25,6 +26,7 @@ services:
     build: php-fpm
     volumes:
       - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html
+      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/extensions/private
   mariadb:
     build: mariadb
     environment:

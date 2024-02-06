@@ -1,2 +1,52 @@
 #!/usr/bin/env -S sh -eu
-docker compose exec -w /var/www/${MEDIAWIKI_HOST}/html php-fpm php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
+
+main () {
+    if mediawiki_is_not_installed; then
+        install_mediawiki
+    fi
+    if local_settings_contain_public_and_private_parameters; then
+        download_local_settings
+        generate_public_local_settings
+        generate_private_local_settings
+        overwrite_local_settings
+    fi
+}
+
+mediawiki_is_not_installed () {
+    ! docker compose exec php-fpm [ -f /var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php ]
+}
+
+install_mediawiki () {
+    docker compose exec -w /var/www/${MEDIAWIKI_HOST}/html php-fpm php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
+}
+
+local_settings_contain_public_and_private_parameters () {
+    docker compose exec php-fpm grep -q ^\$wgSitename /var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php
+}
+
+download_local_settings () {
+    docker compose cp php-fpm:/var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php $TMP/local_settings
+}
+
+generate_public_local_settings () {
+    sed -e '/^$wgDBpassword/d' -e '/^$wgSecretKey/d' -e '/^$wgUpgradeKey/d' $TMP/local_settings > mediawiki-private-extension/LocalSettings.php
+}
+
+generate_private_local_settings () {
+    cat <<-EOF > $TMP/private_local_settings
+<?php
+$(grep ^\$wgDBpassword $TMP/local_settings)
+$(grep ^\$wgSecretKey $TMP/local_settings)
+$(grep ^\$wgUpgradeKey $TMP/local_settings)
+require_once "\$IP/extensions/private/LocalSettings.php";
+EOF
+}
+
+overwrite_local_settings () {
+    docker compose cp $TMP/private_local_settings php-fpm:/var/www/${MEDIAWIKI_HOST}/html/LocalSettings.php
+}
+
+TMP=$(mktemp -d)
+main
+rm -r $TMP
+
