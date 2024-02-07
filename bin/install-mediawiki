@@ -1,0 +1,98 @@
+#!/usr/bin/env -S sh -eu
+
+main () {
+    generate_local_settings
+    download_local_settings
+    generate_public_settings
+    upload_public_settings
+    generate_private_settings
+    upload_private_settings
+    generate_new_local_settings
+    upload_new_local_settings
+    install_authorized_ssh_key
+    create_mediawiki_public_settings_repository
+    initialize_mediawiki_public_settings_repository
+    install_post_receive_hook
+}
+
+generate_local_settings () {
+    docker compose exec -w /var/www/${MEDIAWIKI_HOST}/html/w php-fpm php maintenance/install.php --pass=${MEDIAWIKI_ADMIN_PASS}  --dbuser=${MEDIAWIKI_DB_USER} --dbserver=mariadb --dbpass=${MEDIAWIKI_DB_PASS} --installdbuser=root --installdbpass=${MARIADB_ROOT_PASSWORD} --server=http://${MEDIAWIKI_HOST} --scriptpath=${MEDIAWIKI_SCRIPT_PATH} ${MEDIAWIKI_WIKI_NAME} ${MEDIAWIKI_ADMIN_USER}
+}
+
+download_local_settings () {
+    docker compose cp php-fpm:/var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php $TMP/local_settings
+}
+
+generate_public_settings () {
+    sed -e '/^$wgDBpassword/d' -e '/^$wgSecretKey/d' -e '/^$wgUpgradeKey/d' $TMP/local_settings > $TMP/public_settings
+}
+
+upload_public_settings () {
+    docker compose cp $TMP/public_settings php-fpm:/var/www/${MEDIAWIKI_HOST}/html/w/public/LocalSettings.php
+}
+
+generate_private_settings () {
+    cat <<-EOF > $TMP/private_settings
+<?php
+$(grep ^\$wgDBpassword $TMP/local_settings)
+$(grep ^\$wgSecretKey $TMP/local_settings)
+$(grep ^\$wgUpgradeKey $TMP/local_settings)
+EOF
+}
+
+upload_private_settings () {
+    docker compose cp $TMP/private_settings php-fpm:/var/www/${MEDIAWIKI_HOST}/html/w/private/LocalSettings.php
+}
+
+generate_new_local_settings () {
+    cat <<-EOF > $TMP/new_local_settings
+<?php
+require_once "\$IP/private/LocalSettings.php";
+require_once "\$IP/public/LocalSettings.php";
+EOF
+}
+
+upload_new_local_settings () {
+    docker compose cp $TMP/new_local_settings php-fpm:/var/www/${MEDIAWIKI_HOST}/html/w/LocalSettings.php
+}
+
+install_authorized_ssh_key () {
+    echo $AUTHORIZED_SSH_KEY > $TMP/authorized_keys
+    docker compose cp $TMP/authorized_keys git:/home/git/.ssh/authorized_keys
+    docker compose exec git chown git:git /home/git/.ssh/authorized_keys
+}
+
+create_mediawiki_public_settings_repository () {
+    docker compose exec git chown -R git:git /mediawiki-public-settings
+    docker compose exec git su git -c "mkdir -p /opt/git/mediawiki-public-settings.git && git init --bare /opt/git/mediawiki-public-settings.git"
+}
+
+initialize_mediawiki_public_settings_repository () {
+    docker compose exec git su git -c "cd /opt/git && git clone /opt/git/mediawiki-public-settings.git && cd mediawiki-public-settings && cp /mediawiki-public-settings/LocalSettings.php . && git add LocalSettings.php && git commit -m 'initial commit' && git push -u origin main && cd .. && rm -rf mediawiki-public-settings"
+}
+
+install_post_receive_hook () {
+    POST_RECEIVE_HOOK_PATH=/opt/git/mediawiki-public-settings.git/hooks/post-receive
+    cat <<-EOF > $TMP/post-receive
+GIT_DIR=/opt/git/mediawiki-public-settings.git
+TARGET=/mediawiki-public-settings
+BRANCH=main
+while read oldrev newrev ref
+do
+        if [ "\$ref" = "refs/heads/\$BRANCH" ];
+        then
+                echo "Ref \$ref received. Deploying \${BRANCH} branch on server..."
+                git --work-tree="\${TARGET}" --git-dir="\${GIT_DIR}" checkout -f \${BRANCH}
+        else
+                echo "Ref \$ref received. Doing nothing: only the \${BRANCH} branch may be deployed on this server."
+        fi
+done
+EOF
+    docker compose cp $TMP/post-receive git:$POST_RECEIVE_HOOK_PATH
+    docker compose exec git chown git:git $POST_RECEIVE_HOOK_PATH
+    docker compose exec git chmod +x $POST_RECEIVE_HOOK_PATH
+}
+
+TMP=$(mktemp -d)
+main
+rm -r $TMP

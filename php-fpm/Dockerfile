@@ -10,3 +10,8 @@ RUN apt-get update && \
     git \
     imagemagick && \
     rm -rf /var/lib/apt/lists/*
+ARG MEDIAWIKI_HOST
+# Fix directory permissions for Nginx user
+RUN mkdir -p /var/www/${MEDIAWIKI_HOST}/html/w/private && \
+    mkdir -p /var/www/${MEDIAWIKI_HOST}/html/w/public && \
+    chown -R 101:101 /var/www/${MEDIAWIKI_HOST}

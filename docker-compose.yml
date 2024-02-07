@@ -4,17 +4,11 @@ services:
     ports:
       - 80:80
     volumes:
-      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html/w
-      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/w/extensions/private
+      - mediawiki-app:/var/www/${MEDIAWIKI_HOST}/html/w
+      - mediawiki-private:/var/www/${MEDIAWIKI_HOST}/html/w/private
+      - mediawiki-public:/var/www/${MEDIAWIKI_HOST}/html/w/public
     environment:
       - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
-    depends_on:
-      mediawiki-html:
-        condition: service_completed_successfully
-      mariadb:
-        condition: service_started
-      php-fpm:
-        condition: service_started
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost" ]
       start_period: 1m
@@ -22,29 +16,22 @@ services:
       interval: 1m
       timeout: 5s
       retries: 3
-  mediawiki-html:
-    build: mediawiki-html
+  mediawiki-app:
+    build:
+      context: mediawiki-app
+      args:
+        MEDIAWIKI_TARBALL_URL: ${MEDIAWIKI_TARBALL_URL}
     volumes:
-      - mediawiki-html:/mediawiki
-    environment:
-      - MEDIAWIKI_HOST=${MEDIAWIKI_HOST}
-      - MEDIAWIKI_TARBALL_URL=${MEDIAWIKI_TARBALL_URL}
-      - MEDIAWIKI_ADMIN_PASS=${MEDIAWIKI_ADMIN_PASS}
-      - MEDIAWIKI_DB_USER=${MEDIAWIKI_DB_USER}
-      - MEDIAWIKI_DB_PASS=${MEDIAWIKI_DB_PASS}
-      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
-      - MEDIAWIKI_SCRIPT_PATH=${MEDIAWIKI_SCRIPT_PATH}
-      - MEDIAWIKI_WIKI_NAME=${MEDIAWIKI_WIKI_NAME}
-      - MEDIAWIKI_ADMIN_USER=${MEDIAWIKI_ADMIN_USER}
-    depends_on:
-      mariadb:
-        condition: service_healthy
+      - mediawiki-app:/mediawiki
   php-fpm:
-    build: php-fpm
-    image: 283124aa-c663-4ec0-900d-82cab0ab7c29
+    build:
+      context: php-fpm
+      args:
+        MEDIAWIKI_HOST: ${MEDIAWIKI_HOST}
     volumes:
-      - mediawiki-html:/var/www/${MEDIAWIKI_HOST}/html/w
-      - ./mediawiki-private-extension:/var/www/${MEDIAWIKI_HOST}/html/w/extensions/private
+      - mediawiki-app:/var/www/${MEDIAWIKI_HOST}/html/w
+      - mediawiki-private:/var/www/${MEDIAWIKI_HOST}/html/w/private
+      - mediawiki-public:/var/www/${MEDIAWIKI_HOST}/html/w/public
     # User and group id
     #
     # Since 1.17.0, both alpine- and debian-based images variants use
@@ -69,7 +56,19 @@ services:
       interval: 1m
       timeout: 5s
       retries: 3
+  git:
+    build: git
+    ports:
+      - 8022:22
+    volumes:
+      - git-ssh-configuration:/home/git/.ssh
+      - git-repositories:/opt/git
+      - mediawiki-public:/mediawiki-public-settings
 
 volumes:
   mariadb:
-  mediawiki-html:
+  mediawiki-app:
+  mediawiki-private:
+  mediawiki-public:
+  git-ssh-configuration:
+  git-repositories:
