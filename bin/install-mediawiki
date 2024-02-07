@@ -62,19 +62,21 @@ install_authorized_ssh_key () {
     docker compose exec git chown git:git /home/git/.ssh/authorized_keys
 }
 
+MEDIAWIKI_PUBLIC_SETTINGS_GIT_PATH=/opt/git/mediawiki-public-settings.git
+
 create_mediawiki_public_settings_repository () {
     docker compose exec git chown -R git:git /mediawiki-public-settings
-    docker compose exec git su git -c "mkdir -p /opt/git/mediawiki-public-settings.git && git init --bare /opt/git/mediawiki-public-settings.git"
+    docker compose exec git su git -c "mkdir -p $MEDIAWIKI_PUBLIC_SETTINGS_GIT_PATH && git init --bare $MEDIAWIKI_PUBLIC_SETTINGS_GIT_PATH"
 }
 
 initialize_mediawiki_public_settings_repository () {
-    docker compose exec git su git -c "cd /opt/git && git clone /opt/git/mediawiki-public-settings.git && cd mediawiki-public-settings && cp /mediawiki-public-settings/LocalSettings.php . && git add LocalSettings.php && git commit -m 'initial commit' && git push -u origin main && cd .. && rm -rf mediawiki-public-settings"
+    docker compose exec git su git -c "cd /opt/git && git clone $MEDIAWIKI_PUBLIC_SETTINGS_GIT_PATH && cd mediawiki-public-settings && cp /mediawiki-public-settings/LocalSettings.php . && git add LocalSettings.php && git commit -m 'initial commit' && git push -u origin main && cd .. && rm -rf mediawiki-public-settings"
 }
 
 install_post_receive_hook () {
-    POST_RECEIVE_HOOK_PATH=/opt/git/mediawiki-public-settings.git/hooks/post-receive
+    POST_RECEIVE_HOOK_PATH=$MEDIAWIKI_PUBLIC_SETTINGS_GIT_PATH/hooks/post-receive
     cat <<-EOF > $TMP/post-receive
-GIT_DIR=/opt/git/mediawiki-public-settings.git
+GIT_DIR=$MEDIAWIKI_PUBLIC_SETTINGS_GIT_PATH
 TARGET=/mediawiki-public-settings
 BRANCH=main
 while read oldrev newrev ref
