@@ -22,6 +22,8 @@ services:
     networks:
       - traefik
       - backend
+    depends_on:
+      - mediawiki-app
   mediawiki-app:
     build:
       context: mediawiki-app
@@ -52,6 +54,8 @@ services:
     networks:
       - traefik
       - backend
+    depends_on:
+      - mediawiki-app
   mariadb:
     build: mariadb
     environment:
