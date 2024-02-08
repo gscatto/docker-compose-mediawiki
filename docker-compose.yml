@@ -14,6 +14,14 @@ services:
       interval: 1m
       timeout: 5s
       retries: 3
+    labels:
+      traefik.enable: true
+      traefik.http.routers.nginx.rule: "Host(`${MEDIAWIKI_HOST}`)"
+      traefik.http.services.nginx.loadbalancer.server.port: "80"
+      traefik.docker.network: traefik
+    networks:
+      - traefik
+      - backend
   mediawiki-app:
     build:
       context: mediawiki-app
@@ -41,6 +49,9 @@ services:
     #
     # Source: https://hub.docker.com/_/nginx
     user: 101:101
+    networks:
+      - traefik
+      - backend
   mariadb:
     build: mariadb
     environment:
@@ -54,6 +65,8 @@ services:
       interval: 1m
       timeout: 5s
       retries: 3
+    networks:
+      - backend
   git:
     build: git
     volumes:
@@ -68,3 +81,8 @@ volumes:
   mediawiki-public:
   git-ssh-configuration:
   git-repositories:
+
+networks:
+  backend:
+  traefik:
+    external: true
