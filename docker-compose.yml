@@ -1,8 +1,6 @@
 services:
   nginx:
     build: nginx
-    ports:
-      - 80:80
     volumes:
       - mediawiki-app:/var/www/${MEDIAWIKI_HOST}/html/w
       - mediawiki-private:/var/www/${MEDIAWIKI_HOST}/html/w/private
@@ -58,8 +56,6 @@ services:
       retries: 3
   git:
     build: git
-    ports:
-      - 8022:22
     volumes:
       - git-ssh-configuration:/home/git/.ssh
       - git-repositories:/opt/git
